@@ -1,0 +1,23 @@
+- hosts: localhost
+  connection: local
+  vars:
+    settings:
+      HELLO: nurse
+
+  vars_files:
+    - vars/credentials.yml
+  tasks:
+    - name: Get existing heroku apps
+      command: heroku apps
+      changed_when: false
+      register: apps
+
+    - name : Create Heroku App
+      heroku:
+        apikey: "{ {heroku_api_key} }"
+        app: "{ {heroku_app_name} }"
+        command: "create {{app}}"
+        when: 'apps.stdout.find(app) == -1'
+    - name : Get the app URL
+      shell : |
+        heroku apps: info '{{heroku_app_name }}'
